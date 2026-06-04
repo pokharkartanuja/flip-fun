@@ -1,937 +1,733 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flip-Fun - Memory Game</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flip-Fun - Memory Game for Kids</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Fredoka:wght@400;700&display=swap" rel="stylesheet">
+        body {
+            font-family: 'Fredoka', sans-serif;
+            overflow: hidden;
+            background: #000;
+        }
 
-<style>
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+        /* ===== START SCREEN ===== */
+        #startScreen {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            z-index: 10;
+            overflow: hidden;
+        }
 
-body {
-  font-family: "Fredoka", "Segoe UI Emoji", sans-serif;
-  color: white;
-  text-align: center;
-  background: #000;
-  overflow: hidden;
-}
+        #emojiBoard {
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 8px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+            animation: float 3s ease-in-out infinite;
+        }
 
-/* ================= START SCREEN ================= */
-#startScreen {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  z-index: 10;
-  overflow: hidden;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  background-size: 400% 400%;
-  animation: gradientShift 15s ease infinite;
-}
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
 
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+        .cell {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            animation: pulse 2s ease-in-out infinite;
+        }
 
-#startScreen::before {
-  content: "";
-  position: absolute;
-  width: 200%;
-  height: 200%;
-  background: repeating-linear-gradient(
-    120deg,
-    rgba(255, 255, 255, 0.1),
-    rgba(255, 255, 255, 0.1) 2px,
-    transparent 2px,
-    transparent 40px
-  );
-  animation: streakMove 8s linear infinite;
-  transform: rotate(10deg);
-}
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
 
-@keyframes streakMove {
-  from { transform: translateX(0) rotate(10deg); }
-  to { transform: translateX(-200px) rotate(10deg); }
-}
+        .game-title {
+            font-family: 'Bangers', cursive;
+            font-size: 100px;
+            color: white;
+            text-shadow: 0 0 30px #00e5ff, 0 0 60px #ff00ff;
+            z-index: 2;
+            margin-bottom: 30px;
+            animation: titleBounce 1s ease-in-out infinite;
+        }
 
-#emojiBoard {
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  grid-template-rows: repeat(6, 1fr);
-  gap: 10px;
-  padding: 15px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 35px;
-  backdrop-filter: blur(6px);
-  animation: boardFloat 6s ease-in-out infinite;
-}
+        @keyframes titleBounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
 
-@keyframes boardFloat {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
-}
+        .play-btn {
+            font-size: 28px;
+            padding: 20px 80px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #ffdd00, #ff7b00);
+            color: #000;
+            font-weight: bold;
+            z-index: 2;
+            cursor: pointer;
+            animation: buttonPulse 1.5s infinite;
+            box-shadow: 0 10px 30px rgba(255, 123, 0, 0.5);
+            transition: transform 0.2s;
+        }
 
-.cell {
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 12px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 32px;
-  animation: cellBounce 0.6s ease-in-out infinite;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
+        .play-btn:hover {
+            transform: scale(1.1);
+        }
 
-.cell:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: scale(1.1);
-}
+        .play-btn:active {
+            transform: scale(0.95);
+        }
 
-@keyframes cellBounce {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
-}
+        @keyframes buttonPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
 
-.game-title {
-  font-family: 'Bangers', cursive;
-  font-size: 120px;
-  text-shadow: 0 0 30px #00e5ff, 0 0 60px #ff00ff;
-  z-index: 2;
-  animation: titlePulse 2s ease-in-out infinite;
-  letter-spacing: 3px;
-}
+        /* ===== LEVEL SCREEN ===== */
+        #levelScreen {
+            display: none;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #FFD700 0%, #87CEEB 100%);
+            padding: 30px;
+            overflow-y: auto;
+            z-index: 10;
+        }
 
-@keyframes titlePulse {
-  0%, 100% { transform: scale(1); text-shadow: 0 0 30px #00e5ff, 0 0 60px #ff00ff; }
-  50% { transform: scale(1.05); text-shadow: 0 0 40px #00e5ff, 0 0 80px #ff00ff; }
-}
+        #levelScreen h1 {
+            font-family: 'Bangers', cursive;
+            font-size: 70px;
+            color: white;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            margin-bottom: 40px;
+            text-align: center;
+        }
 
-.play-btn {
-  font-size: 28px;
-  padding: 20px 80px;
-  border: none;
-  border-radius: 50px;
-  cursor: pointer;
-  background: linear-gradient(135deg, #ffdd00, #ff7b00);
-  color: #000;
-  font-weight: bold;
-  z-index: 2;
-  animation: pulse 1.2s infinite;
-  box-shadow: 0 10px 30px rgba(255, 123, 0, 0.4);
-  transition: all 0.3s ease;
-  font-family: 'Fredoka', sans-serif;
-}
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 15px;
+            max-width: 800px;
+            margin: 0 auto 50px;
+        }
 
-.play-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 15px 40px rgba(255, 123, 0, 0.6);
-}
+        .level-btn {
+            padding: 20px;
+            border-radius: 15px;
+            border: none;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
 
-.play-btn:active {
-  transform: scale(0.95);
-}
+        .level-btn:hover:not(.locked) {
+            transform: scale(1.15) rotate(3deg);
+            box-shadow: 0 10px 25px rgba(255, 165, 0, 0.5);
+        }
 
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.08); }
-}
+        .level-btn.locked {
+            background: linear-gradient(135deg, #999, #666);
+            color: white;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
 
-/* ================= LEVEL SCREEN ================= */
-#levelScreen {
-  display: none;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><linearGradient id="sky" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:%23FFD700;stop-opacity:1" /><stop offset="100%" style="stop-color:%2387CEEB;stop-opacity:1" /></linearGradient></defs><rect width="1200" height="800" fill="url(%23sky)"/><circle cx="200" cy="150" r="80" fill="%23FFD700" opacity="0.8"/><circle cx="1000" cy="120" r="60" fill="white" opacity="0.7"/><path d="M 0 500 Q 300 450 600 480 T 1200 500 L 1200 800 L 0 800" fill="%2300AA44" opacity="0.8"/><circle cx="150" cy="550" r="40" fill="%2365B741" opacity="0.9"/><circle cx="900" cy="580" r="50" fill="%2365B741" opacity="0.85"/></svg>') center/cover no-repeat;
-  background-size: cover;
-  background-attachment: fixed;
-  overflow: auto;
-  padding: 40px 20px;
-}
+        /* ===== GAME SCREEN ===== */
+        #gameScreen {
+            display: none;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #87CEEB 0%, #FFD700 100%);
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 10;
+        }
 
-#levelScreen h1 {
-  font-family: 'Bangers', cursive;
-  font-size: 80px;
-  color: white;
-  text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-  margin: 30px 0;
-  animation: bounce 1s ease-in-out infinite;
-}
+        #gameScreen h2 {
+            font-family: 'Bangers', cursive;
+            font-size: 50px;
+            color: white;
+            text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
 
-@keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
-}
+        #gameBoard {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 20px;
+            background: linear-gradient(135deg, #8b5a2b, #a0724a);
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+        }
 
-.level-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-  gap: 15px;
-  max-width: 600px;
-  margin: 30px auto;
-}
+        .tile {
+            width: 80px;
+            height: 80px;
+            cursor: pointer;
+            perspective: 1000px;
+        }
 
-.level {
-  padding: 20px;
-  border-radius: 15px;
-  background: linear-gradient(135deg, #FFD700, #FFA500);
-  cursor: pointer;
-  font-size: 18px;
-  font-weight: bold;
-  color: #000;
-  transition: all 0.3s ease;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-}
+        .tile-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
 
-.level:hover:not(.level.locked) {
-  transform: scale(1.15) rotate(5deg);
-  box-shadow: 0 10px 25px rgba(255, 165, 0, 0.5);
-}
+        .tile.flipped .tile-inner {
+            transform: rotateY(180deg);
+        }
 
-.level.locked {
-  background: linear-gradient(135deg, #999999, #666666);
-  color: white;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
+        .tile-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            font-size: 40px;
+            backface-visibility: hidden;
+        }
 
-/* ================= GAME ================= */
-#gameScreen {
-  display: none;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><linearGradient id="sky2" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:%2387CEEB;stop-opacity:1" /><stop offset="100%" style="stop-color:%23E0F6FF;stop-opacity:1" /></linearGradient></defs><rect width="1200" height="800" fill="url(%23sky2)"/><circle cx="100" cy="100" r="60" fill="%23FFD700" opacity="0.9"/><circle cx="1100" cy="80" r="50" fill="white" opacity="0.8"/><ellipse cx="600" cy="600" rx="400" ry="150" fill="%2300AA44" opacity="0.85"/><circle cx="250" cy="650" r="45" fill="%2365B741"/><circle cx="950" cy="680" r="55" fill="%2365B741"/></svg>') center/cover no-repeat;
-  background-size: cover;
-  background-attachment: fixed;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-}
+        .tile-front {
+            background: linear-gradient(135deg, #d2a679, #e6c9a0);
+            color: #8b5a2b;
+            font-weight: bold;
+        }
 
-#levelTitle {
-  font-family: 'Bangers', cursive;
-  font-size: 60px;
-  color: white;
-  text-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-  margin-bottom: 30px;
-}
+        .tile-back {
+            background: linear-gradient(135deg, #fff3d1, #ffe8a0);
+            transform: rotateY(180deg);
+        }
 
-#woodBoard {
-  width: 420px;
-  height: 420px;
-  background: linear-gradient(135deg, #8b5a2b, #a0724a);
-  border: 12px solid #5c3b1e;
-  border-radius: 20px;
-  display: grid;
-  gap: 8px;
-  padding: 15px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-}
+        /* ===== WIN SCREEN ===== */
+        #winScreen {
+            display: none;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
 
-.tile {
-  perspective: 1000px;
-  width: 70px;
-  height: 70px;
-  cursor: pointer;
-}
+        .win-box {
+            background: linear-gradient(135deg, #ffdd00, #ff7b00, #ff1493);
+            padding: 50px;
+            border-radius: 30px;
+            text-align: center;
+            color: white;
+            animation: winPop 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
 
-.inner {
-  width: 100%;
-  height: 100%;
-  position: relative;
-  transform-style: preserve-3d;
-  transition: transform 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
+        @keyframes winPop {
+            0% { transform: scale(0.3); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
 
-.tile.flipped .inner {
-  transform: rotateY(180deg);
-}
+        .win-box h1 {
+            font-family: 'Bangers', cursive;
+            font-size: 70px;
+            margin-bottom: 20px;
+        }
 
-.face {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  border-radius: 8px;
-  backface-visibility: hidden;
-  font-size: 32px;
-}
+        .win-box button {
+            margin: 10px;
+            padding: 15px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 25px;
+            background: white;
+            color: #ff7b00;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
 
-.front {
-  background: linear-gradient(135deg, #d2a679, #e6c9a0);
-  box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.3), inset 0 -2px 5px rgba(0, 0, 0, 0.2);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 36px;
-  font-weight: bold;
-  color: #8b5a2b;
-}
+        .win-box button:hover {
+            transform: scale(1.1);
+        }
 
-.back {
-  background: linear-gradient(135deg, #fff3d1, #ffe8a0);
-  transform: rotateY(180deg);
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
-}
+        /* ===== LOSE SCREEN ===== */
+        #loseScreen {
+            display: none;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            justify-content: center;
+            align-items: center;
+            z-index: 999;
+        }
 
-/* ================= WIN ================= */
-#winScreen {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  display: none;
-  justify-content: center;
-  align-items: center;
-  background: rgba(0, 0, 0, 0.85);
-  z-index: 999;
-}
+        .lose-box {
+            background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
+            padding: 50px;
+            border-radius: 30px;
+            text-align: center;
+            color: white;
+            animation: loseShake 0.4s;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        }
 
-.winBox {
-  background: linear-gradient(135deg, #ffdd00, #ff7b00, #ff1493);
-  padding: 50px;
-  border-radius: 30px;
-  color: white;
-  position: relative;
-  z-index: 10000;
-  box-shadow: 0 20px 60px rgba(255, 123, 0, 0.5);
-  animation: winBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
+        @keyframes loseShake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-20px); }
+            75% { transform: translateX(20px); }
+        }
 
-@keyframes winBounce {
-  0% { transform: scale(0.5) rotate(-10deg); opacity: 0; }
-  100% { transform: scale(1) rotate(0); opacity: 1; }
-}
+        .lose-box h1 {
+            font-family: 'Bangers', cursive;
+            font-size: 70px;
+            margin-bottom: 20px;
+        }
 
-.winBox h1 {
-  font-family: 'Bangers', cursive;
-  font-size: 72px;
-  text-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
-  margin-bottom: 20px;
-}
+        .lose-box button {
+            margin: 10px;
+            padding: 15px 40px;
+            font-size: 18px;
+            border: none;
+            border-radius: 25px;
+            background: white;
+            color: #FF6B6B;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
 
-.winBox button {
-  font-size: 20px;
-  padding: 15px 40px;
-  margin: 10px;
-  border: none;
-  border-radius: 25px;
-  cursor: pointer;
-  background: white;
-  color: #ff7b00;
-  font-weight: bold;
-  transition: all 0.3s ease;
-  font-family: 'Fredoka', sans-serif;
-}
+        .lose-box button:hover {
+            transform: scale(1.1);
+        }
 
-.winBox button:hover {
-  transform: scale(1.1);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-}
+        /* ===== CONTROLS ===== */
+        .controls {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
 
-.winBox button:active {
-  transform: scale(0.95);
-}
+        .controls button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
 
-#confettiCanvas {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
+        .controls button:hover {
+            transform: scale(1.1);
+        }
 
-.sparkle {
-  position: absolute;
-  font-size: 30px;
-  animation: spark 1s linear forwards;
-}
+        .timer {
+            position: fixed;
+            top: 80px;
+            right: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
 
-@keyframes spark {
-  from {
-    opacity: 1;
-    transform: scale(0) rotate(0deg);
-  }
-  to {
-    opacity: 0;
-    transform: translateY(-100px) scale(2) rotate(360deg);
-  }
-}
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 600px) {
+            .game-title {
+                font-size: 60px;
+            }
 
-/* ================= BUTTONS ================= */
-button {
-  padding: 12px 20px;
-  border: none;
-  border-radius: 15px;
-  background: linear-gradient(135deg, #FFD700, #FFA500);
-  color: #000;
-  font-weight: bold;
-  cursor: pointer;
-  font-size: 18px;
-  transition: all 0.3s ease;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
+            #gameBoard {
+                grid-template-columns: repeat(3, 1fr);
+            }
 
-button:hover {
-  transform: scale(1.1);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-}
+            .tile {
+                width: 60px;
+                height: 60px;
+            }
 
-button:active {
-  transform: scale(0.95);
-}
+            .tile-face {
+                font-size: 30px;
+            }
 
-/* ================= LOSE SCREEN ================= */
-#loseScreen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.9);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 99999;
-}
+            .win-box, .lose-box {
+                padding: 30px;
+            }
 
-#loseScreen > div {
-  background: linear-gradient(135deg, #FF6B6B, #FF8E8E);
-  color: white;
-  padding: 40px;
-  border-radius: 30px;
-  text-align: center;
-  animation: loseShake 0.6s ease-in-out;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
-}
+            .win-box h1, .lose-box h1 {
+                font-size: 50px;
+            }
+        }
 
-#loseScreen h1 {
-  font-family: 'Bangers', cursive;
-  font-size: 80px;
-  margin-bottom: 30px;
-}
-
-@keyframes loseShake {
-  0%, 100% { transform: translateX(0); }
-  25% { transform: translateX(-20px); }
-  75% { transform: translateX(20px); }
-}
-
-/* ================= RESPONSIVE ================= */
-@media (max-width: 600px) {
-  .game-title {
-    font-size: 70px;
-  }
-
-  #woodBoard {
-    width: 100%;
-    max-width: 300px;
-    height: 300px;
-  }
-
-  .winBox {
-    padding: 30px;
-  }
-
-  .winBox h1 {
-    font-size: 50px;
-  }
-
-  #levelScreen h1 {
-    font-size: 50px;
-  }
-}
-</style>
+        #confetti {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 998;
+        }
+    </style>
 </head>
-
 <body>
 
-<!-- START -->
+<!-- START SCREEN -->
 <div id="startScreen">
-  <div id="emojiBoard"></div>
-  <div class="game-title">FLIP-FUN</div>
-  <button class="play-btn" onclick="showLevels()">🎮 PLAY 🎮</button>
+    <div id="emojiBoard"></div>
+    <div class="game-title">FLIP-FUN</div>
+    <button class="play-btn" onclick="goToLevels()">🎮 PLAY 🎮</button>
 </div>
 
-<!-- LEVELS -->
+<!-- LEVEL SCREEN -->
 <div id="levelScreen">
-  <h1>🎯 Select Your Level 🎯</h1>
-  <div class="level-grid" id="levelGrid"></div>
+    <h1>🎯 Select Your Level 🎯</h1>
+    <div class="level-grid" id="levelGrid"></div>
 </div>
 
-<!-- GAME -->
+<!-- GAME SCREEN -->
 <div id="gameScreen">
-  <h2 id="levelTitle"></h2>
-  <div id="woodBoard"></div>
-</div>
-
-<!-- WIN -->
-<div id="winScreen">
-  <canvas id="confettiCanvas"></canvas>
-  <div class="winBox">
-    <h1>🎉 Level Complete! 🎉</h1>
-    <button onclick="nextLevel()">⭐ Next Level ⭐</button>
-    <button onclick="backToLevels()">📋 Select Levels 📋</button>
-  </div>
-</div>
-
-<script>
-
-/* ================= START BOARD ================= */
-const startEmojis=["🍎","🍌","🍇","🍒","🍉","🍍","🥝","🍑","🐱","🐶","⚽","🚗","🎈","🎨","🌟","🎪"];
-const board=document.getElementById("emojiBoard");
-
-for(let i=0;i<36;i++){
-  let d=document.createElement("div");
-  d.className="cell";
-  d.innerText=startEmojis[Math.floor(Math.random()*startEmojis.length)];
-  board.appendChild(d);
-}
-
-/* ================= DATA ================= */
-const emojis=["🍎","🍌","🍇","🍒","🍉","🍍","🥝","🍑"];
-
-let selected=[];
-let currentLevel=1;
-
-let coins = parseInt(localStorage.getItem("coins") || "0");
-
-/* ✅ FIX: ONLY LEVEL 1 UNLOCKED INITIALLY */
-let unlockedLevel = parseInt(localStorage.getItem("unlockedLevel") || "1");
-if(!localStorage.getItem("unlockedLevel")){
-  unlockedLevel = 1;
-}
-
-/* ================= NAV ================= */
-function showLevels(){
-  document.getElementById("startScreen").style.display="none";
-  document.getElementById("levelScreen").style.display="block";
-  generateLevels();
-}
-
-function backToLevels(){
-  document.getElementById("winScreen").style.display="none";
-  document.getElementById("gameScreen").style.display="none";
-  document.getElementById("levelScreen").style.display="block";
-  selected=[];
-  generateLevels();
-}
-
-/* ================= LEVELS ================= */
-function generateLevels(){
-  let grid=document.getElementById("levelGrid");
-  grid.innerHTML="";
-
-  for(let i=1;i<=100;i++){
-    let d=document.createElement("div");
-    d.className="level";
-    
-    if(i<=unlockedLevel){
-      d.innerText="⭐ "+i;
-      d.onclick=()=>startLevel(i);
-    }else{
-      d.innerText="🔒";
-      d.className="level locked";
-      d.onclick=()=>alert("🔐 Complete Level "+(i-1)+" to unlock this level!");
-    }
-
-    grid.appendChild(d);
-  }
-}
-
-/* ================= GAME ================= */
-function startLevel(level){
-  if(level>unlockedLevel) return;
-
-  currentLevel=level;
-
-  document.getElementById("levelScreen").style.display="none";
-  document.getElementById("gameScreen").style.display="flex";
-  document.getElementById("levelTitle").innerText="🎮 Level "+level;
-
-  let board=document.getElementById("woodBoard");
-  board.innerHTML="";
-  selected=[];
-
-  let arr=[];
-  for(let i=0;i<8;i++) arr.push(emojis[i],emojis[i]);
-  arr.sort(()=>0.5-Math.random());
-
-  board.style.gridTemplateColumns="repeat(4,1fr)";
-
-  arr.forEach(e=>{
-    let tile=document.createElement("div");
-    tile.className="tile";
-
-    tile.innerHTML=`
-      <div class="inner">
-        <div class="face front">❓</div>
-        <div class="face back">${e}</div>
-      </div>
-    `;
-
-    tile.onclick=()=>{
-      if(tile.classList.contains("flipped")) return;
-      if(selected.length >= 2) return;
-
-      tile.classList.add("flipped");
-      selected.push({tile,e});
-
-      if(selected.length===2){
-        setTimeout(checkMatch,600);
-      }
-    };
-
-    board.appendChild(tile);
-  });
-}
-
-/* ================= MATCH ================= */
-function checkMatch(){
-  let[a,b]=selected;
-
-  if(a.e!==b.e){
-    a.tile.classList.remove("flipped");
-    b.tile.classList.remove("flipped");
-  }
-
-  selected=[];
-  checkWin();
-}
-
-/* ================= WIN CHECK ================= */
-function checkWin(){
-  let all=document.querySelectorAll(".tile");
-  let flipped=document.querySelectorAll(".tile.flipped");
-
-  if(flipped.length===all.length){
-    showWin();
-  }
-}
-
-/* ================= FIXED WIN LOGIC ================= */
-function showWin(){
-  document.getElementById("winScreen").style.display="flex";
-  startConfetti();
-
-  if(unlockedLevel === currentLevel && unlockedLevel < 100){
-    unlockedLevel++;
-    localStorage.setItem("unlockedLevel",unlockedLevel);
-  }
-}
-
-/* ================= FIXED NEXT BUTTON ================= */
-function nextLevel(){
-  document.getElementById("winScreen").style.display="none";
-  document.getElementById("gameScreen").style.display="none";
-  selected=[];
-  if(currentLevel < 100) {
-    startLevel(currentLevel+1);
-  } else {
-    alert("🏆 Congratulations! You've completed all levels!");
-    backToLevels();
-  }
-}
-
-/* ================= CONFETTI ================= */
-let ctx,particles=[];
-
-function startConfetti(){
-  let canvas=document.getElementById("confettiCanvas");
-  ctx=canvas.getContext("2d");
-
-  canvas.width=window.innerWidth;
-  canvas.height=window.innerHeight;
-
-  particles=[];
-
-  for(let i=0;i<150;i++){
-    particles.push({
-      x:Math.random()*canvas.width,
-      y:Math.random()*canvas.height,
-      r:Math.random()*6+2,
-      vx:(Math.random()-0.5)*8,
-      vy:Math.random()*5+3,
-      color:'hsl('+Math.random()*360+',100%,50%)'
-    });
-  }
-
-  animate();
-}
-
-function animate(){
-  ctx.clearRect(0,0,window.innerWidth,window.innerHeight);
-
-  particles.forEach(p=>{
-    p.y+=p.vy;
-    p.x+=p.vx;
-    p.vy+=0.1;
-    
-    if(p.y>window.innerHeight) p.y=-10;
-    if(p.x>window.innerWidth) p.x=-10;
-    if(p.x<0) p.x=window.innerWidth;
-
-    ctx.fillStyle=p.color;
-    ctx.fillRect(p.x,p.y,p.r,p.r);
-  });
-
-  requestAnimationFrame(animate);
-}
-
-</script>
-
-<script>
-/* ===================== GLOBAL GAME ADD-ON SYSTEM ===================== */
-
-/* ---------- SOUND SYSTEM ---------- */
-let soundEnabled = true;
-
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-
-function playClickSound(){
-  if(!soundEnabled) return;
-  let osc = audioCtx.createOscillator();
-  let gain = audioCtx.createGain();
-
-  osc.type = "triangle";
-  osc.frequency.value = 600;
-
-  gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.2);
-
-  osc.connect(gain);
-  gain.connect(audioCtx.destination);
-
-  osc.start();
-  osc.stop(audioCtx.currentTime + 0.2);
-}
-
-/* override clicks globally */
-document.addEventListener("click", playClickSound, true);
-
-/* ---------- START SCREEN BUTTONS ---------- */
-function addStartScreenButtons(){
-  const start = document.getElementById("startScreen");
-
-  let box = document.createElement("div");
-  box.style.position = "absolute";
-  box.style.bottom = "30px";
-  box.style.right = "30px";
-  box.style.display = "flex";
-  box.style.gap = "15px";
-  box.style.zIndex = "20";
-
-  let homeBtn = document.createElement("button");
-  homeBtn.innerText = "🏠 Home";
-  homeBtn.style.padding = "12px 20px";
-  homeBtn.style.borderRadius = "25px";
-  homeBtn.onclick = () => location.reload();
-
-  let soundBtn = document.createElement("button");
-  soundBtn.innerText = "🔊 Sound";
-  soundBtn.style.padding = "12px 20px";
-  soundBtn.style.borderRadius = "25px";
-
-  soundBtn.onclick = () => {
-    soundEnabled = !soundEnabled;
-    soundBtn.innerText = soundEnabled ? "🔊 Sound" : "🔇 Mute";
-  };
-
-  box.appendChild(homeBtn);
-  box.appendChild(soundBtn);
-  start.appendChild(box);
-}
-addStartScreenButtons();
-
-/* ---------- TOP BUTTONS ---------- */
-function addTopButtons(){
-  let box = document.createElement("div");
-
-  box.innerHTML = `
-    <button onclick="location.reload()">🏠 Home</button>
-    <button onclick="document.getElementById('gameScreen').style.display='none';document.getElementById('levelScreen').style.display='block'">🔙 Back</button>
-  `;
-
-  box.style.position = "fixed";
-  box.style.top = "15px";
-  box.style.left = "15px";
-  box.style.display = "flex";
-  box.style.gap = "10px";
-  box.style.zIndex = "100";
-
-  document.body.appendChild(box);
-}
-addTopButtons();
-
-/* ---------- GAME PAUSE + TIMER SYSTEM ---------- */
-let gamePaused = false;
-let levelTime = 0;
-let timerInterval = null;
-
-function getTimeByLevel(lv){
-  if(lv <= 30) return 120;   // 2 min
-  if(lv <= 70) return 240;   // 4 min
-  return 300;               // 5 min
-}
-
-/* override startLevel */
-const _startLevel = startLevel;
-
-startLevel = function(level){
-  _startLevel(level);
-
-  clearInterval(timerInterval);
-  gamePaused = false;
-
-  levelTime = getTimeByLevel(level);
-
-  let oldTimer = document.getElementById("timerBox");
-  if(oldTimer) oldTimer.remove();
-
-  let timerBox = document.createElement("div");
-  timerBox.id = "timerBox";
-  timerBox.style.position = "fixed";
-  timerBox.style.top = "120px";
-  timerBox.style.left = "15px";
-  timerBox.style.color = "white";
-  timerBox.style.fontSize = "28px";
-  timerBox.style.fontWeight = "bold";
-  timerBox.style.zIndex = "100";
-  timerBox.style.textShadow = "0 0 10px rgba(0,0,0,0.5)";
-  document.body.appendChild(timerBox);
-  
-
-  timerInterval = setInterval(() => {
-    if(gamePaused) return;
-
-    levelTime--;
-
-    let m = Math.floor(levelTime/60);
-    let s = levelTime%60;
-
-    timerBox.innerText = `⏳ ${m}:${s<10?"0"+s:s}`;
-
-    if(levelTime <= 0){
-      clearInterval(timerInterval);
-      showLose();
-    }
-  },1000);
-};
-
-/* ---------- GAME SCREEN BUTTONS ---------- */
-function injectGameButtons(){
-  const game = document.getElementById("gameScreen");
-
-  let box = document.createElement("div");
-  box.style.position = "fixed";
-  box.style.top = "15px";
-  box.style.right = "15px";
-  box.style.display = "flex";
-  box.style.gap = "10px";
-  box.style.zIndex = "100";
-
-  let pauseBtn = document.createElement("button");
-  pauseBtn.innerText = "⏸ Pause";
-  pauseBtn.style.padding = "12px 20px";
-  pauseBtn.onclick = () => {
-    gamePaused = !gamePaused;
-    pauseBtn.innerText = gamePaused ? "▶ Resume" : "⏸ Pause";
-  };
-
-  let restartBtn = document.createElement("button");
-  restartBtn.innerText = "🔄 Restart";
-  restartBtn.style.padding = "12px 20px";
-  restartBtn.onclick = () => startLevel(currentLevel);
-
-  box.appendChild(pauseBtn);
-  box.appendChild(restartBtn);
-  game.appendChild(box);
-}
-injectGameButtons();
-
-/* ---------- WIN / LOSE UI ---------- */
-function showLose(){
-  clearInterval(timerInterval);
-
-  let oldLose = document.getElementById("loseScreen");
-  if(oldLose) oldLose.remove();
-
-  let lose = document.createElement("div");
-  lose.id = "loseScreen";
-
-  lose.innerHTML = `
-    <div>
-      <h1>⏰ Time's Up!</h1>
-      <p style="font-size:24px;margin-bottom:20px;">Don't worry, try again!</p>
-      <button id="retryBtn">🔄 Retry</button>
-      <button id="levelsBtn">📋 Back to Levels</button>
+    <h2 id="levelTitle">Level 1</h2>
+    <div id="gameBoard"></div>
+    <div class="controls">
+        <button onclick="pauseGame()">⏸ Pause</button>
+        <button onclick="restartGame()">🔄 Restart</button>
+        <button onclick="goToLevels()">📋 Levels</button>
     </div>
-  `;
+    <div class="timer" id="timer"></div>
+</div>
 
-  document.body.appendChild(lose);
+<!-- WIN SCREEN -->
+<div id="winScreen">
+    <canvas id="confetti"></canvas>
+    <div class="win-box">
+        <h1>🎉 LEVEL COMPLETE! 🎉</h1>
+        <p id="coinText" style="font-size: 28px; margin: 20px 0;"></p>
+        <button onclick="nextLevel()">⭐ Next Level ⭐</button>
+        <button onclick="goToLevels()">📋 Select Level 📋</button>
+    </div>
+</div>
 
-  document.getElementById("retryBtn").addEventListener("click", () => {
-    lose.remove();
-    startLevel(currentLevel);
-  });
+<!-- LOSE SCREEN -->
+<div id="loseScreen">
+    <div class="lose-box">
+        <h1>⏰ TIME'S UP! ⏰</h1>
+        <p style="font-size: 24px; margin: 20px 0;">Don't worry, try again!</p>
+        <button onclick="restartGame()">🔄 Retry</button>
+        <button onclick="goToLevels()">📋 Select Level 📋</button>
+    </div>
+</div>
 
-  document.getElementById("levelsBtn").addEventListener("click", () => {
-    lose.remove();
-    backToLevels();
-  });
-}
-
-function createSparkles(){
-  let box = document.querySelector(".winBox");
-
-  for(let i=0;i<30;i++){
-    let s = document.createElement("div");
-    s.className = "sparkle";
-    s.innerHTML = ["✨","🌟","💫","⭐"][Math.floor(Math.random()*4)];
-
-    s.style.left = Math.random()*300 + "px";
-    s.style.top = Math.random()*150 + "px";
-    s.style.position = "absolute";
-
-    box.appendChild(s);
-
-    setTimeout(()=>s.remove(),1000);
-  }
-}
-
-const _showWin = showWin;
-
-showWin = function(){
-  clearInterval(timerInterval);
-  coins+=10;
-  localStorage.setItem("coins",coins);
-
-  _showWin();
-
-  setTimeout(() => {
-    let title = document.querySelector(".winBox h1");
-    if(title){
-      title.innerHTML = "🎉 Awesome! +10 🪙<br>Total: "+coins+" 🪙";
-    }
-    createSparkles();
-  },100);
+<script>
+// ===== GAME STATE =====
+let gameState = {
+    currentLevel: 1,
+    unlockedLevel: parseInt(localStorage.getItem('unlockedLevel')) || 1,
+    coins: parseInt(localStorage.getItem('coins')) || 0,
+    selected: [],
+    gameRunning: false,
+    gamePaused: false,
+    timeLeft: 0,
+    timerInterval: null
 };
+
+const emojis = ['🍎', '🍌', '🍇', '🍒', '🍉', '🍍', '🥝', '🍑'];
+const startEmojis = ['🍎', '🍌', '🍇', '🍒', '🍉', '🍍', '🥝', '🍑', '🐱', '🐶', '⚽', '🚗', '🎈', '🎨', '🌟', '🎪'];
+
+// ===== INITIALIZATION =====
+function initializeStartScreen() {
+    const board = document.getElementById('emojiBoard');
+    board.innerHTML = '';
+    for (let i = 0; i < 25; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.textContent = startEmojis[Math.floor(Math.random() * startEmojis.length)];
+        board.appendChild(cell);
+    }
+}
+
+initializeStartScreen();
+
+// ===== NAVIGATION =====
+function goToLevels() {
+    clearGameTimer();
+    document.getElementById('startScreen').style.display = 'none';
+    document.getElementById('levelScreen').style.display = 'block';
+    document.getElementById('gameScreen').style.display = 'none';
+    document.getElementById('winScreen').style.display = 'none';
+    document.getElementById('loseScreen').style.display = 'none';
+    generateLevelGrid();
+}
+
+function startGame(level) {
+    if (level > gameState.unlockedLevel) return;
+    
+    gameState.currentLevel = level;
+    gameState.selected = [];
+    gameState.gameRunning = true;
+    gameState.gamePaused = false;
+    
+    document.getElementById('levelScreen').style.display = 'none';
+    document.getElementById('gameScreen').style.display = 'flex';
+    document.getElementById('winScreen').style.display = 'none';
+    document.getElementById('loseScreen').style.display = 'none';
+    
+    document.getElementById('levelTitle').textContent = '🎮 Level ' + level;
+    createGameBoard();
+    startGameTimer();
+}
+
+function nextLevel() {
+    if (gameState.currentLevel < 100) {
+        startGame(gameState.currentLevel + 1);
+    } else {
+        alert('🏆 Congratulations! You completed all levels!');
+        goToLevels();
+    }
+}
+
+function restartGame() {
+    startGame(gameState.currentLevel);
+}
+
+function pauseGame() {
+    gameState.gamePaused = !gameState.gamePaused;
+}
+
+// ===== LEVEL GENERATION =====
+function generateLevelGrid() {
+    const grid = document.getElementById('levelGrid');
+    grid.innerHTML = '';
+    
+    for (let i = 1; i <= 100; i++) {
+        const btn = document.createElement('button');
+        btn.className = 'level-btn';
+        
+        if (i <= gameState.unlockedLevel) {
+            btn.textContent = '⭐ ' + i;
+            btn.onclick = () => startGame(i);
+        } else {
+            btn.textContent = '🔒';
+            btn.className = 'level-btn locked';
+        }
+        
+        grid.appendChild(btn);
+    }
+}
+
+// ===== GAME BOARD =====
+function createGameBoard() {
+    const board = document.getElementById('gameBoard');
+    board.innerHTML = '';
+    gameState.selected = [];
+    
+    let tiles = [];
+    for (let i = 0; i < 8; i++) {
+        tiles.push(emojis[i], emojis[i]);
+    }
+    tiles.sort(() => Math.random() - 0.5);
+    
+    tiles.forEach((emoji, index) => {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.innerHTML = `
+            <div class="tile-inner">
+                <div class="tile-face tile-front">❓</div>
+                <div class="tile-face tile-back">${emoji}</div>
+            </div>
+        `;
+        
+        tile.dataset.emoji = emoji;
+        tile.dataset.index = index;
+        tile.onclick = () => flipTile(tile);
+        
+        board.appendChild(tile);
+    });
+}
+
+function flipTile(tile) {
+    if (gameState.gamePaused || gameState.selected.length >= 2 || tile.classList.contains('flipped')) return;
+    
+    tile.classList.add('flipped');
+    gameState.selected.push(tile);
+    
+    if (gameState.selected.length === 2) {
+        setTimeout(checkMatch, 600);
+    }
+}
+
+function checkMatch() {
+    const [tile1, tile2] = gameState.selected;
+    const match = tile1.dataset.emoji === tile2.dataset.emoji;
+    
+    if (!match) {
+        tile1.classList.remove('flipped');
+        tile2.classList.remove('flipped');
+    }
+    
+    gameState.selected = [];
+    checkWin();
+}
+
+function checkWin() {
+    const allTiles = document.querySelectorAll('.tile');
+    const flippedTiles = document.querySelectorAll('.tile.flipped');
+    
+    if (allTiles.length === flippedTiles.length) {
+        showWinScreen();
+    }
+}
+
+// ===== WIN/LOSE SCREENS =====
+function showWinScreen() {
+    clearGameTimer();
+    gameState.gameRunning = false;
+    
+    gameState.coins += 10;
+    localStorage.setItem('coins', gameState.coins);
+    
+    if (gameState.currentLevel === gameState.unlockedLevel && gameState.unlockedLevel < 100) {
+        gameState.unlockedLevel++;
+        localStorage.setItem('unlockedLevel', gameState.unlockedLevel);
+    }
+    
+    document.getElementById('gameScreen').style.display = 'none';
+    document.getElementById('winScreen').style.display = 'flex';
+    document.getElementById('coinText').textContent = '🪙 +10 Coins! Total: ' + gameState.coins + ' 🪙';
+    
+    startConfetti();
+}
+
+function showLoseScreen() {
+    clearGameTimer();
+    gameState.gameRunning = false;
+    document.getElementById('gameScreen').style.display = 'none';
+    document.getElementById('loseScreen').style.display = 'flex';
+}
+
+// ===== TIMER =====
+function getTimeLimit(level) {
+    if (level <= 30) return 120;
+    if (level <= 70) return 240;
+    return 300;
+}
+
+function startGameTimer() {
+    clearGameTimer();
+    gameState.timeLeft = getTimeLimit(gameState.currentLevel);
+    updateTimerDisplay();
+    
+    gameState.timerInterval = setInterval(() => {
+        if (gameState.gamePaused) return;
+        
+        gameState.timeLeft--;
+        updateTimerDisplay();
+        
+        if (gameState.timeLeft <= 0) {
+            showLoseScreen();
+        }
+    }, 1000);
+}
+
+function clearGameTimer() {
+    if (gameState.timerInterval) {
+        clearInterval(gameState.timerInterval);
+        gameState.timerInterval = null;
+    }
+}
+
+function updateTimerDisplay() {
+    const mins = Math.floor(gameState.timeLeft / 60);
+    const secs = gameState.timeLeft % 60;
+    document.getElementById('timer').textContent = `⏳ ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+}
+
+// ===== CONFETTI =====
+function startConfetti() {
+    const canvas = document.getElementById('confetti');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    const particles = [];
+    for (let i = 0; i < 100; i++) {
+        particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            size: Math.random() * 5 + 2,
+            vx: (Math.random() - 0.5) * 8,
+            vy: Math.random() * 5 + 3,
+            color: 'hsl(' + Math.random() * 360 + ', 100%, 50%)'
+        });
+    }
+    
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        particles.forEach(p => {
+            p.y += p.vy;
+            p.x += p.vx;
+            p.vy += 0.1;
+            
+            if (p.y > canvas.height) p.y = -10;
+            if (p.x > canvas.width) p.x = -10;
+            if (p.x < 0) p.x = canvas.width;
+            
+            ctx.fillStyle = p.color;
+            ctx.fillRect(p.x, p.y, p.size, p.size);
+        });
+        
+        requestAnimationFrame(animate);
+    }
+    
+    animate();
+}
 </script>
+
 </body>
 </html>
